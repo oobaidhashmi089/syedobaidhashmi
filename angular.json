@@ -76,6 +76,22 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "github-pages": {
+              "baseHref": "/syedobaidhashmi/",
+              "outputHashing": "all",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1mb",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "60kB",
+                  "maximumError": "90kB"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
