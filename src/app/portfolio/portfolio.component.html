@@ -19,12 +19,10 @@
         <li class="nav-mobile-extra">
           <button type="button" class="nav-mobile-download" (click)="downloadResume(); closeMenu()">Download Resume</button>
         </li>
-        <li class="nav-mobile-extra"><a href="mailto:syedhashmi089@gmail.com" (click)="closeMenu()">Hire Me</a></li>
       </ul>
       <div class="nav-actions">
         <button type="button" class="nav-studio nav-download-btn" (click)="downloadResume()">Download Resume</button>
         <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" class="nav-studio">Resume Studio</a>
-        <a href="mailto:syedhashmi089@gmail.com" class="nav-cta">Hire Me</a>
       </div>
       <button type="button" class="hamburger" [class.open]="mobileMenuOpen" (click)="toggleMenu()" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -68,7 +66,7 @@
             <button type="button" class="btn-secondary btn-download" (click)="downloadResume()">Download Resume</button>
           </div>
           <div class="hero-btn-slot hero-btn-slot--secondary">
-            <a href="mailto:syedhashmi089@gmail.com" class="btn-secondary">✉ Get In Touch</a>
+            <button type="button" class="btn-secondary btn-contact" (click)="openContactForm()">✉ Get In Touch</button>
           </div>
         </div>
         <div class="hero-stats">
@@ -121,26 +119,31 @@
           &nbsp;&nbsp;available: true<br />
           &#125;;
         </div>
-        <!-- Portrait: save your image as public/portfolio/profile.jpg (replace file when ready). -->
+        <!-- Portrait: public/portfolio/profile.jpg -->
         <figure class="hero-photo-card">
-          <div class="hero-photo-topfx" aria-hidden="true"></div>
-          @if (!photoMissing()) {
-            <img
-              src="/portfolio/profile.jpg"
-              width="400"
-              height="500"
-              alt="Syed Obaid Hashmi"
-              class="hero-photo"
-              (error)="onPhotoError()"
-              loading="eager"
-              decoding="async"
-            />
-          }
-          @if (photoMissing()) {
-            <div class="hero-photo-fallback" role="img" aria-label="Portrait placeholder">
-              <span class="hero-photo-initials">SOH</span>
+          <div class="hero-photo-stage">
+            <span class="hero-photo-glow-ring" aria-hidden="true"></span>
+            <div class="hero-photo-circle">
+              <div class="hero-photo-topfx" aria-hidden="true"></div>
+              @if (!photoMissing()) {
+                <img
+                  src="portfolio/profile.jpg"
+                  width="280"
+                  height="280"
+                  alt="Syed Obaid Hashmi"
+                  class="hero-photo"
+                  (error)="onPhotoError()"
+                  loading="eager"
+                  decoding="async"
+                />
+              }
+              @if (photoMissing()) {
+                <div class="hero-photo-fallback" role="img" aria-label="Portrait placeholder">
+                  <span class="hero-photo-initials">SOH</span>
+                </div>
+              }
             </div>
-          }
+          </div>
         </figure>
       </aside>
     </div>
@@ -337,11 +340,67 @@
         <p class="contact-desc reveal-up">{{ contactBlurb }}</p>
         <a [href]="'mailto:' + personal.email" class="contact-email reveal-up">{{ personal.email }}</a>
         <div class="contact-socials reveal-up">
-          <a [href]="personal.linkedin" target="_blank" rel="noopener" class="social-btn">💼 LinkedIn</a>
-          <a [href]="telHref()" class="social-btn">📞 Call</a>
-          <a [href]="'mailto:' + personal.email" class="social-btn">✉ Email</a>
-          <button type="button" class="social-btn" (click)="downloadResume()">⬇ Download Resume</button>
-          <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" class="social-btn social-studio">🔐 Resume Editor</a>
+          <a [href]="personal.linkedin" target="_blank" rel="noopener" class="social-btn">
+            <span class="social-btn-icon social-btn-icon--linkedin" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path
+                  fill="currentColor"
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                />
+              </svg>
+            </span>
+            LinkedIn
+          </a>
+          <a [href]="telHref()" class="social-btn">
+            <span class="social-btn-icon social-btn-icon--call" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            Call
+          </a>
+          <a [href]="'mailto:' + personal.email" class="social-btn">
+            <span class="social-btn-icon social-btn-icon--email" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.75" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            Email
+          </a>
+          <button type="button" class="social-btn" (click)="downloadResume()">
+            <span class="social-btn-icon social-btn-icon--download" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+              </svg>
+            </span>
+            Download Resume
+          </button>
+          <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" class="social-btn social-studio">
+            <span class="social-btn-icon social-btn-icon--studio" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 18v-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+                <path d="M9 15h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+              </svg>
+            </span>
+            Resume Editor
+          </a>
         </div>
         <div class="contact-location reveal-up">📍 {{ personal.location }} · Remote-friendly</div>
       </div>
@@ -355,4 +414,48 @@
       <a href="#hero" class="footer-back">↑ Top</a>
     </div>
   </footer>
+
+  @if (contactModalOpen()) {
+    <div class="contact-modal-backdrop" (click)="closeContactForm()">
+      <section class="contact-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Contact form">
+        <button type="button" class="contact-modal-close" (click)="closeContactForm()" aria-label="Close contact form">×</button>
+        <h3>Career Connections</h3>
+        <p>Share your details and I will get back to you by email.</p>
+
+        <form class="contact-form" #contactForm="ngForm" (ngSubmit)="submitContactForm()">
+          <label>
+            Full Name
+            <input name="name" [(ngModel)]="contactFormData.name" required minlength="2" />
+          </label>
+          <label>
+            Work Email
+            <input type="email" name="email" [(ngModel)]="contactFormData.email" required />
+          </label>
+          <label>
+            Company
+            <input name="company" [(ngModel)]="contactFormData.company" required />
+          </label>
+          <label>
+            Role / Position
+            <input name="role" [(ngModel)]="contactFormData.role" required />
+          </label>
+          <label>
+            Message
+            <textarea name="message" [(ngModel)]="contactFormData.message" rows="5" required minlength="10"></textarea>
+          </label>
+
+          @if (contactError()) {
+            <div class="contact-form-error">{{ contactError() }}</div>
+          }
+          @if (contactSubmitted()) {
+            <div class="contact-form-success">Message sent successfully. Thank you!</div>
+          }
+
+          <button type="submit" class="contact-form-submit" [disabled]="contactForm.invalid || contactSubmitting()">
+            {{ contactSubmitting() ? 'Sending...' : 'Submit' }}
+          </button>
+        </form>
+      </section>
+    </div>
+  }
 </div>

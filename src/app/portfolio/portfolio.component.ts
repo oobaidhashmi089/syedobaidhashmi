@@ -8,6 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import {
@@ -35,7 +36,7 @@ import {
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './portfolio.component.html',
   styleUrl: './portfolio.component.scss',
 })
@@ -115,10 +116,22 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
     cancelAnimationFrame(this.rafCursor);
     cancelAnimationFrame(this.rafParticles);
     document.removeEventListener('mousemove', this.boundMove);
+    document.body.style.overflow = '';
     if (this.typingTimer) clearTimeout(this.typingTimer);
   }
 
   mobileMenuOpen = false;
+  readonly contactModalOpen = signal(false);
+  readonly contactSubmitting = signal(false);
+  readonly contactSubmitted = signal(false);
+  readonly contactError = signal('');
+  readonly contactFormData = {
+    name: '',
+    email: '',
+    company: '',
+    role: '',
+    message: '',
+  };
 
   toggleMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -126,6 +139,55 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
 
   closeMenu(): void {
     this.mobileMenuOpen = false;
+  }
+
+  openContactForm(): void {
+    this.contactModalOpen.set(true);
+    this.contactError.set('');
+    this.contactSubmitted.set(false);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeContactForm(): void {
+    this.contactModalOpen.set(false);
+    this.contactSubmitting.set(false);
+    this.contactError.set('');
+    document.body.style.overflow = '';
+  }
+
+  async submitContactForm(): Promise<void> {
+    if (this.contactSubmitting()) return;
+    this.contactError.set('');
+    this.contactSubmitting.set(true);
+    try {
+      const body = new URLSearchParams({
+        name: this.contactFormData.name.trim(),
+        email: this.contactFormData.email.trim(),
+        company: this.contactFormData.company.trim(),
+        role: this.contactFormData.role.trim(),
+        message: this.contactFormData.message.trim(),
+        _subject: 'New Recruiter Inquiry from Portfolio',
+        _template: 'table',
+      });
+
+      const res = await fetch('https://formsubmit.co/ajax/syedhashmi089@gmail.com', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body,
+      });
+      if (!res.ok) throw new Error('submit_failed');
+      this.contactSubmitted.set(true);
+      this.contactFormData.name = '';
+      this.contactFormData.email = '';
+      this.contactFormData.company = '';
+      this.contactFormData.role = '';
+      this.contactFormData.message = '';
+      window.setTimeout(() => this.closeContactForm(), 1400);
+    } catch {
+      this.contactError.set('Could not send message right now. Please try again in a moment.');
+    } finally {
+      this.contactSubmitting.set(false);
+    }
   }
 
   private esc(v: string): string {
