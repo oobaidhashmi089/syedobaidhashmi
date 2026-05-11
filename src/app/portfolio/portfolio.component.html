@@ -209,7 +209,22 @@
       <div class="skills-grid">
         @for (card of skillCards; track card.name) {
           <div class="skill-card reveal-up">
-            <div class="sc-icon">{{ card.icon }}</div>
+            <div class="sc-icon" [class.sc-icon--dynamics]="card.name === 'ERP / CRM'">
+              @if (card.name === 'ERP / CRM') {
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <defs>
+                    <linearGradient id="dynGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#baff29" />
+                      <stop offset="52%" stop-color="#8ef04f" />
+                      <stop offset="100%" stop-color="#00d4ff" />
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#dynGrad)" d="M14 8h24l14 12-18 14 20 22H33L14 35V8zm12 13v13l9-7-9-6z" />
+                </svg>
+              } @else {
+                {{ card.icon }}
+              }
+            </div>
             <div class="sc-name">{{ card.name }}</div>
             <div class="sc-tags">
               @for (t of card.tags; track t) {
@@ -276,9 +291,56 @@
 
       <div class="erp-grid">
         @for (erp of erpCards; track erp.title) {
-          <div class="erp-card reveal-up">
+          <div
+            class="erp-card reveal-up"
+            [class.erp-card--fno]="erp.logo === 'fno'"
+            [class.erp-card--commerce]="erp.logo === 'commerce'"
+            [class.erp-card--crm]="erp.logo === 'crm'"
+          >
             <div class="erp-number">{{ erp.num }}</div>
-            <div class="erp-icon">{{ erp.icon }}</div>
+            <div class="erp-icon">
+              @switch (erp.logo) {
+                @case ('fno') {
+                  <span class="erp-brand-img-wrap" role="img" aria-label="Dynamics 365 Finance and Operations">
+                    <img
+                      class="erp-brand-img erp-brand-img--fno"
+                      src="portfolio/dynamics-fno-logo.png"
+                      width="40"
+                      height="40"
+                      alt=""
+                      decoding="async"
+                      loading="lazy"
+                    />
+                  </span>
+                }
+                @case ('commerce') {
+                  <span class="erp-brand-img-wrap" role="img" aria-label="Dynamics 365 Commerce">
+                    <img
+                      class="erp-brand-img erp-brand-img--commerce"
+                      src="portfolio/commerce365-logo.png"
+                      width="40"
+                      height="40"
+                      alt=""
+                      decoding="async"
+                      loading="lazy"
+                    />
+                  </span>
+                }
+                @case ('crm') {
+                  <span class="erp-brand-img-wrap" role="img" aria-label="Dynamics 365 CRM">
+                    <img
+                      class="erp-brand-img erp-brand-img--crm"
+                      src="portfolio/dynamics-crm-logo.png"
+                      width="40"
+                      height="40"
+                      alt=""
+                      decoding="async"
+                      loading="lazy"
+                    />
+                  </span>
+                }
+              }
+            </div>
             <div class="erp-name">{{ erp.title }}</div>
             <ul class="erp-points">
               @for (pt of erp.items; track $index) {
@@ -418,9 +480,13 @@
   @if (contactModalOpen()) {
     <div class="contact-modal-backdrop" (click)="closeContactForm()">
       <section class="contact-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Contact form">
-        <button type="button" class="contact-modal-close" (click)="closeContactForm()" aria-label="Close contact form">×</button>
-        <h3>Career Connections</h3>
-        <p>Share your details and I will get back to you by email.</p>
+        <div class="contact-modal-head">
+          <div>
+            <h3>Career Connections</h3>
+            <p>Share your details and I will get back to you by email.</p>
+          </div>
+          <button type="button" class="contact-modal-close" (click)="closeContactForm()" aria-label="Close contact form">← Back</button>
+        </div>
 
         <form class="contact-form" #contactForm="ngForm" (ngSubmit)="submitContactForm()">
           <label>
@@ -451,9 +517,12 @@
             <div class="contact-form-success">Message sent successfully. Thank you!</div>
           }
 
-          <button type="submit" class="contact-form-submit" [disabled]="contactForm.invalid || contactSubmitting()">
-            {{ contactSubmitting() ? 'Sending...' : 'Submit' }}
-          </button>
+          <div class="contact-form-actions">
+            <button type="button" class="contact-form-cancel" (click)="closeContactForm()">Back</button>
+            <button type="submit" class="contact-form-submit" [disabled]="contactForm.invalid || contactSubmitting()">
+              {{ contactSubmitting() ? 'Sending...' : 'Submit' }}
+            </button>
+          </div>
         </form>
       </section>
     </div>

@@ -142,19 +142,21 @@ export function portfolioCertRows(): { title: string; meta: string }[] {
   return DEFAULT_RESUME_MODEL.certifications.map(parseCertificationLine);
 }
 
-const ERP_ICONS = ['🏭', '🛒', '🤝'];
+export type PortfolioErpLogo = 'fno' | 'commerce' | 'crm';
 
 export interface PortfolioErpCard {
   num: string;
-  icon: string;
+  logo: PortfolioErpLogo;
   title: string;
   items: string[];
 }
 
+const ERP_LOGOS: PortfolioErpLogo[] = ['fno', 'commerce', 'crm'];
+
 export function portfolioErpCards(): PortfolioErpCard[] {
   return DEFAULT_RESUME_MODEL.erpBlocks.map((b, i) => ({
     num: String(i + 1).padStart(2, '0'),
-    icon: ERP_ICONS[i] ?? '📋',
+    logo: ERP_LOGOS[i] ?? 'crm',
     title: b.title,
     items: b.items,
   }));

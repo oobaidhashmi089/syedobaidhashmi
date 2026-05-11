@@ -80,6 +80,7 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
 
   private rafCursor = 0;
   private rafParticles = 0;
+  private scrollTicking = false;
   private mx = -100;
   private my = -100;
   private rx = -100;
@@ -100,7 +101,7 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initCursor();
-    this.initParticles();
+    this.initParticles(this.isLowPerformanceMode());
     this.initTyping();
     this.initReveal();
     this.initCounters();
@@ -315,13 +316,27 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
   }
 
   private onWinScroll = (): void => {
-    this.navScroll();
-    this.animateTimeline();
-    this.heroParallax();
+    if (this.scrollTicking) return;
+    this.scrollTicking = true;
+    requestAnimationFrame(() => {
+      this.navScroll();
+      this.animateTimeline();
+      if (!this.isLowPerformanceMode()) this.heroParallax();
+      this.scrollTicking = false;
+    });
   };
 
+  private isLowPerformanceMode(): boolean {
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+    const saveData = !!nav.connection?.saveData;
+    const lowCpu = typeof nav.hardwareConcurrency === 'number' && nav.hardwareConcurrency <= 4;
+    const smallScreen = window.matchMedia('(max-width: 900px)').matches;
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    return saveData || lowCpu || (smallScreen && coarsePointer);
+  }
+
   private heroParallax(): void {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || this.isLowPerformanceMode()) return;
     const hi = document.querySelector('.hero-inner') as HTMLElement | null;
     if (!hi) return;
     const y = window.scrollY;
@@ -367,7 +382,7 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
     this.rafCursor = requestAnimationFrame(loop);
   }
 
-  private initParticles(): void {
+  private initParticles(lowPower = false): void {
     const canvas = this.particleCanvas?.nativeElement;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -394,7 +409,8 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
       canvas.height = Math.max(1, Math.floor(H * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       pts.length = 0;
-      for (let i = 0; i < 90; i++) pts.push(mkPt());
+      const particleCount = lowPower ? 34 : 90;
+      for (let i = 0; i < particleCount; i++) pts.push(mkPt());
     };
     resize();
     window.addEventListener('resize', resize);
@@ -420,11 +436,12 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
           const dx = p.x - q.x;
           const dy = p.y - q.y;
           const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 120) {
+          const maxLineDistance = lowPower ? 78 : 120;
+          if (d < maxLineDistance) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
-            ctx.strokeStyle = `rgba(186,255,41,${(1 - d / 120) * 0.12})`;
+            ctx.strokeStyle = `rgba(186,255,41,${(1 - d / maxLineDistance) * (lowPower ? 0.08 : 0.12)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -562,7 +579,7 @@ export class PortfolioComponent implements AfterViewInit, OnDestroy {
   }
 
   private initCardTilt(): void {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(pointer: coarse)').matches || this.isLowPerformanceMode()) return;
     document.querySelectorAll<HTMLElement>('.tl-card, .erp-card, .skill-card').forEach((card) => {
       card.addEventListener('mousemove', (e) => {
         const r = card.getBoundingClientRect();
