@@ -1,0 +1,689 @@
+<div class="shell" [class.editing]="editMode()" [class.pdf-friendly-mode]="pdfFriendly()">
+  <header class="toolbar">
+    <a routerLink="/" class="tb-logo">
+      <span class="tb-logo-icon">📄</span>
+      {{ 'appTitle' | t }}
+    </a>
+
+    <div class="tb-group">
+      @if (editMode()) {
+        <div class="edit-indicator"><span class="edit-dot"></span> {{ 'editing' | t }}</div>
+      }
+      <button type="button" class="tbtn tbtn-ghost" [disabled]="!ws.canUndo() || editMode()" (click)="undo()">{{ 'undo' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" [disabled]="!ws.canRedo() || editMode()" (click)="redo()">{{ 'redo' | t }}</button>
+      <span class="tb-sep"></span>
+      <button type="button" class="tbtn tbtn-edit" [class.on]="editMode()" (click)="toggleEdit()">
+        {{ editMode() ? ('doneEditing' | t) : ('editResume' | t) }}
+      </button>
+      <span class="tb-sep"></span>
+      <div class="zoom-pill">
+        <button type="button" class="zoom-btn" (click)="adjZoom(-10)">−</button>
+        <span class="zoom-lbl">{{ zoom() }}%</span>
+        <button type="button" class="zoom-btn" (click)="adjZoom(10)">+</button>
+      </div>
+    </div>
+
+    <div class="tb-group">
+      <a routerLink="/cover-letter" class="tbtn tbtn-ghost">{{ 'navCover' | t }}</a>
+      <button type="button" class="tbtn tbtn-ghost" [class.on]="pdfFriendly()" (click)="togglePdfFriendly()">{{ 'pdfFriendly' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="fitOnePage()">{{ 'fitOnePage' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="toggleShare()">{{ 'share' | t }}</button>
+      <button type="button" class="tbtn tbtn-print" (click)="doPrint()">{{ 'print' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="doPdfAts()">{{ 'pdfAts' | t }}</button>
+      <button type="button" class="tbtn tbtn-pdf" [disabled]="pdfBusy()" (click)="doPdf()">
+        {{ pdfBusy() ? ('generating' | t) : ('pdfVisual' | t) }}
+      </button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="signOut()">{{ 'signOut' | t }}</button>
+      <span class="tb-sep"></span>
+      <button type="button" class="tbtn tbtn-ghost" (click)="toggleSidebar()">{{ 'panel' | t }}</button>
+    </div>
+  </header>
+  @if (pdfFriendly()) {
+    <div class="pdf-hint">{{ 'pdfFriendlyHint' | t }}</div>
+  }
+
+  @if (shareOpen()) {
+    <div class="modal-back" (click)="toggleShare()"></div>
+    <div class="modal" role="dialog">
+      <h3>{{ 'webShare' | t }}</h3>
+      <p class="hint">{{ 'resumePlainHint' | t }}</p>
+      <div class="modal-actions">
+        <button type="button" class="tbtn tbtn-pdf" (click)="copyPlain(); toggleShare()">{{ 'copyPlainText' | t }}</button>
+        <button type="button" class="tbtn tbtn-print" (click)="webShare(); toggleShare()">{{ 'share' | t }}</button>
+        <button type="button" class="tbtn tbtn-ghost" (click)="downloadJson()">{{ 'downloadJson' | t }}</button>
+        <button type="button" class="tbtn tbtn-ghost" (click)="copyJson()">{{ 'copyJson' | t }}</button>
+      </div>
+      <label class="file-pick">{{ 'importPick' | t }}<input type="file" accept="application/json" (change)="onImportFile($event)" /></label>
+    </div>
+  }
+
+  <div class="app">
+    <div class="canvas" [class.pdf-friendly-canvas]="pdfFriendly()">
+      @if (!pdfFriendly()) {
+        <app-network-canvas [interactive]="false" [density]="0.000045" [speedMul]="0.85" />
+      }
+      <div id="resume-wrap">
+        <div
+          #resumeRoot
+          id="resume-root"
+          [class]="resumeClasses()"
+          [ngStyle]="resumeStyle()"
+        >
+          <header class="r-header">
+            <div class="r-name" [style.textTransform]="nameTextTransform()">
+              @if (editMode()) {
+                <input class="inline-input name-input" [ngModel]="ws.model().personal.name" (ngModelChange)="patchPersonal('name', $event)" />
+              } @else {
+                {{ ws.model().personal.name }}
+              }
+            </div>
+            <div class="r-title">
+              @if (editMode()) {
+                <app-rich-text-field
+                  variant="title"
+                  [ngModel]="ws.model().personal.title"
+                  (ngModelChange)="patchPersonal('title', $event)"
+                />
+              } @else {
+                <div class="rich-view" [innerHTML]="safeRich(ws.model().personal.title)"></div>
+              }
+            </div>
+            <div class="r-contact">
+              <span>
+                @if (!ws.design().plainContact) { <span class="c-ico">📞</span> }
+                @if (editMode()) {
+                  <input class="inline-input sm" [ngModel]="ws.model().personal.phone" (ngModelChange)="patchPersonal('phone', $event)" />
+                } @else {
+                  {{ phoneDisplay() }}
+                }
+              </span>
+              <span>
+                @if (!ws.design().plainContact) { <span class="c-ico">✉</span> }
+                @if (editMode()) {
+                  <input class="inline-input sm" [ngModel]="ws.model().personal.email" (ngModelChange)="patchPersonal('email', $event)" />
+                } @else {
+                  <a [href]="'mailto:' + ws.model().personal.email">{{ ws.model().personal.email }}</a>
+                }
+              </span>
+              <span>
+                @if (!ws.design().plainContact) { <span class="c-ico">🔗</span> }
+                @if (editMode()) {
+                  <input class="inline-input sm" [ngModel]="ws.model().personal.linkedin" (ngModelChange)="patchPersonal('linkedin', $event)" />
+                } @else {
+                  <a [href]="linkedinUrl()" target="_blank" rel="noopener">{{ linkedinLabel() }}</a>
+                }
+              </span>
+              <span>
+                @if (!ws.design().plainContact) { <span class="c-ico">📍</span> }
+                @if (editMode()) {
+                  <input class="inline-input sm" [ngModel]="ws.model().personal.location" (ngModelChange)="patchPersonal('location', $event)" />
+                } @else {
+                  {{ ws.model().personal.location }}
+                }
+              </span>
+            </div>
+          </header>
+
+          @if (ws.sections().summary) {
+            <section class="r-section">
+              <div class="r-section-title">{{ 'professionalSummary' | t }}</div>
+              @if (editMode()) {
+                <app-rich-text-field
+                  class="summary-rich"
+                  [ngModel]="ws.model().summary"
+                  (ngModelChange)="patchSummary($event)"
+                />
+              } @else {
+                <div class="r-summary rich-view" [innerHTML]="safeRich(ws.model().summary)"></div>
+              }
+            </section>
+          }
+
+          @if (ws.sections().skills) {
+            <section class="r-section">
+              <div class="r-section-title flex-title">
+                {{ 'technicalSkills' | t }}
+                @if (editMode()) {
+                  <button type="button" class="mini-btn" (click)="addSkillRow()">+</button>
+                }
+              </div>
+              <div class="r-skills-grid">
+                @for (row of ws.model().skillRows; track $index) {
+                  <div class="r-skill-row">
+                    @if (editMode()) {
+                      <input class="inline-input sm" [ngModel]="row.label" (ngModelChange)="patchSkill($index, 'label', $event)" />
+                      <input class="inline-input" [ngModel]="row.value" (ngModelChange)="patchSkill($index, 'value', $event)" />
+                      <button type="button" class="icon-btn" (click)="removeSkillRow($index)">×</button>
+                    } @else {
+                      <strong>{{ row.label }}</strong> {{ row.value }}
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          @if (ws.sections().experience) {
+            <section class="r-section">
+              <div class="r-section-title flex-title">
+                {{ 'professionalExperience' | t }}
+                @if (editMode()) {
+                  <button type="button" class="mini-btn" (click)="addJob()">+ {{ 'addJob' | t }}</button>
+                }
+              </div>
+              @for (job of ws.model().jobs; track job.id) {
+                <div class="r-job">
+                  @if (editMode()) {
+                    <div class="job-tools">
+                      <button type="button" class="mini-btn" (click)="duplicateJob(job)">{{ 'duplicateJob' | t }}</button>
+                      <button type="button" class="mini-btn danger" (click)="removeJob(job)">{{ 'removeJob' | t }}</button>
+                    </div>
+                  }
+                  <div class="r-job-header">
+                    <div class="r-company">
+                      @if (editMode()) {
+                        <input class="inline-input" [ngModel]="job.company" (ngModelChange)="patchJob(job, 'company', $event)" />
+                      } @else {
+                        {{ job.company }}
+                      }
+                    </div>
+                    <div class="r-dates">
+                      @if (editMode()) {
+                        <input class="inline-input sm" [ngModel]="job.dates" (ngModelChange)="patchJob(job, 'dates', $event)" />
+                      } @else {
+                        {{ job.dates }}
+                      }
+                    </div>
+                  </div>
+                  <div class="r-role">
+                    @if (editMode()) {
+                      <app-rich-text-field
+                        variant="role"
+                        [ngModel]="job.role"
+                        (ngModelChange)="patchJob(job, 'role', $event)"
+                      />
+                    } @else {
+                      <div class="rich-view" [innerHTML]="safeRich(job.role)"></div>
+                    }
+                  </div>
+                  <ul class="r-bullets">
+                    @for (b of job.bullets; track $index) {
+                      <li>
+                        @if (editMode()) {
+                          <div class="bullet-row">
+                            <app-rich-text-field
+                              variant="line"
+                              [ngModel]="b"
+                              (ngModelChange)="updateBullet(job, $index, $event)"
+                            />
+                            <button type="button" class="icon-btn" (click)="removeBullet(job, $index)">×</button>
+                          </div>
+                        } @else {
+                          <div class="rich-view" [innerHTML]="safeRich(b)"></div>
+                        }
+                      </li>
+                    }
+                  </ul>
+                  @if (editMode()) {
+                    <button type="button" class="mini-btn" (click)="addBullet(job)">+ {{ 'addBullet' | t }}</button>
+                  }
+                </div>
+              }
+            </section>
+          }
+
+          @if (ws.sections().erp) {
+            <section class="r-section">
+              <div class="r-section-title">{{ 'erpExpertise' | t }}</div>
+              <div class="r-erp-grid">
+                @for (block of ws.model().erpBlocks; track $index; let bi = $index) {
+                  <div class="r-erp-block">
+                    <div class="r-erp-title">
+                      @if (editMode()) {
+                        <input class="inline-input" [ngModel]="block.title" (ngModelChange)="patchErpTitle(bi, $event)" />
+                      } @else {
+                        {{ block.title }}
+                      }
+                    </div>
+                    <ul>
+                      @for (item of block.items; track $index; let ii = $index) {
+                        <li>
+                          @if (editMode()) {
+                            <div class="bullet-row">
+                              <app-rich-text-field
+                                variant="line"
+                                [ngModel]="item"
+                                (ngModelChange)="patchErpItem(bi, ii, $event)"
+                              />
+                              <button type="button" class="icon-btn" (click)="removeErpItem(bi, ii)">×</button>
+                            </div>
+                          } @else {
+                            <div class="rich-view" [innerHTML]="safeRich(item)"></div>
+                          }
+                        </li>
+                      }
+                    </ul>
+                    @if (editMode()) {
+                      <button type="button" class="mini-btn" (click)="addErpItem(bi)">+ {{ 'addBullet' | t }}</button>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          @if (ws.sections().education) {
+            <section class="r-section">
+              <div class="r-section-title">{{ 'education' | t }}</div>
+              <div class="r-edu-row">
+                <div>
+                  <div class="r-edu-deg">
+                    @if (editMode()) {
+                      <input class="inline-input" [ngModel]="ws.model().education.degree" (ngModelChange)="patchEducation('degree', $event)" />
+                    } @else {
+                      {{ ws.model().education.degree }}
+                    }
+                  </div>
+                  <div class="r-edu-school">
+                    @if (editMode()) {
+                      <input class="inline-input" [ngModel]="ws.model().education.school" (ngModelChange)="patchEducation('school', $event)" />
+                    } @else {
+                      {{ ws.model().education.school }}
+                    }
+                  </div>
+                </div>
+                <div class="r-edu-right">
+                  <div class="r-edu-loc">
+                    @if (editMode()) {
+                      <input class="inline-input sm" [ngModel]="ws.model().education.location" (ngModelChange)="patchEducation('location', $event)" />
+                    } @else {
+                      {{ ws.model().education.location }}
+                    }
+                  </div>
+                  <div class="r-edu-date">
+                    @if (editMode()) {
+                      <input class="inline-input sm" [ngModel]="ws.model().education.dates" (ngModelChange)="patchEducation('dates', $event)" />
+                    } @else {
+                      {{ ws.model().education.dates }}
+                    }
+                  </div>
+                </div>
+              </div>
+            </section>
+          }
+
+          @if (ws.sections().certifications) {
+            <section class="r-section">
+              <div class="r-section-title flex-title">
+                {{ 'certifications' | t }}
+                @if (editMode()) {
+                  <button type="button" class="mini-btn" (click)="addCert()">+</button>
+                }
+              </div>
+              <div class="r-certs-grid">
+                @for (c of ws.model().certifications; track $index) {
+                  <div class="r-cert-item">
+                    @if (editMode()) {
+                      <div class="cert-row">
+                        <input class="inline-input" [ngModel]="c" (ngModelChange)="patchCert($index, $event)" />
+                        <button type="button" class="icon-btn" (click)="removeCert($index)">×</button>
+                      </div>
+                    } @else {
+                      <span>{{ c }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar" [class.closed]="!sidebarOpen()">
+      @if (sidebarOpen()) {
+        <app-network-canvas [interactive]="false" [density]="0.000032" [linkDistance]="96" [speedMul]="0.72" />
+      }
+      <div class="sb-tabs">
+        <button type="button" class="sb-tab" [class.on]="activeTab() === 'design'" (click)="setTab('design')"><span class="tab-icon">🎨</span>{{ 'design' | t }}</button>
+        <button type="button" class="sb-tab" [class.on]="activeTab() === 'spacing'" (click)="setTab('spacing')"><span class="tab-icon">📐</span>{{ 'spacing' | t }}</button>
+        <button type="button" class="sb-tab" [class.on]="activeTab() === 'layout'" (click)="setTab('layout')"><span class="tab-icon">📄</span>{{ 'layout' | t }}</button>
+        <button type="button" class="sb-tab" [class.on]="activeTab() === 'sections'" (click)="setTab('sections')"><span class="tab-icon">👁</span>{{ 'sections' | t }}</button>
+        <button type="button" class="sb-tab" [class.on]="activeTab() === 'tools'" (click)="setTab('tools')"><span class="tab-icon">🧩</span>{{ 'tools' | t }}</button>
+      </div>
+
+      <div class="sb-body">
+        @if (activeTab() === 'design') {
+          <div class="tab-panel">
+            <div class="sbg">
+              <div class="sbg-title">{{ 'accentColor' | t }}</div>
+              <div class="swatches">
+                @for (c of colors; track c.hex) {
+                  <div>
+                    <button
+                      type="button"
+                      class="swatch"
+                      [class.on]="ws.design().accent === c.hex"
+                      [style.background]="c.hex"
+                      (click)="applyAccent(c.hex)"
+                    ></button>
+                    <span class="swatch-name">{{ c.name }}</span>
+                  </div>
+                }
+              </div>
+              <div class="custom-color-row">
+                <label>{{ 'customColor' | t }}</label>
+                <input type="color" [ngModel]="ws.design().accent" (ngModelChange)="applyAccent($event)" />
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'fontPairing' | t }}</div>
+              <div class="font-cards">
+                @for (f of fonts; track f.id) {
+                  <button type="button" class="font-card" [class.on]="ws.design().fontId === f.id" (click)="applyFont(f.id)">
+                    <div class="font-card-info">
+                      <div class="fc-name">{{ f.name }}</div>
+                      <div class="fc-sub">{{ f.sub }}</div>
+                    </div>
+                    <div class="fc-preview" [style.fontFamily]="f.h">Aa</div>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'spacing') {
+          <div class="tab-panel">
+            <div class="sbg">
+              <div class="sbg-title">{{ 'fontSizes' | t }}</div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'nameHeading' | t }}</span><span class="sl-val">{{ ws.design().nameSize }}px</span></div>
+                <input type="range" min="18" max="44" step="1" [ngModel]="ws.design().nameSize" (ngModelChange)="setDesignNumber('nameSize', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'bodyText' | t }}</span><span class="sl-val">{{ ws.design().bodySize }}px</span></div>
+                <input type="range" min="9" max="16" step="0.5" [ngModel]="ws.design().bodySize" (ngModelChange)="setDesignNumber('bodySize', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'contactSmall' | t }}</span><span class="sl-val">{{ ws.design().contactSize }}px</span></div>
+                <input type="range" min="9" max="14" step="0.5" [ngModel]="ws.design().contactSize" (ngModelChange)="setDesignNumber('contactSize', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'sectionTitle' | t }}</span><span class="sl-val">{{ ws.design().sectionTitleSize }}px</span></div>
+                <input type="range" min="9" max="15" step="0.5" [ngModel]="ws.design().sectionTitleSize" (ngModelChange)="setDesignNumber('sectionTitleSize', +$event)" (change)="onSliderChange()" />
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'lineLetter' | t }}</div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'lineHeight' | t }}</span><span class="sl-val">{{ ws.design().lineHeight }}</span></div>
+                <input type="range" min="1.1" max="2.2" step="0.05" [ngModel]="ws.design().lineHeight" (ngModelChange)="setDesignNumber('lineHeight', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'sectionLetterSpacing' | t }}</span><span class="sl-val">{{ ws.design().sectionLetterSpacing }}px</span></div>
+                <input type="range" min="0" max="6" step="0.5" [ngModel]="ws.design().sectionLetterSpacing" (ngModelChange)="setDesignNumber('sectionLetterSpacing', +$event)" (change)="onSliderChange()" />
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'gapsSpacing' | t }}</div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'sectionGap' | t }}</span><span class="sl-val">{{ ws.design().sectionGap }}px</span></div>
+                <input type="range" min="6" max="30" step="1" [ngModel]="ws.design().sectionGap" (ngModelChange)="setDesignNumber('sectionGap', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'bulletGap' | t }}</span><span class="sl-val">{{ ws.design().bulletGap }}px</span></div>
+                <input type="range" min="0" max="12" step="1" [ngModel]="ws.design().bulletGap" (ngModelChange)="setDesignNumber('bulletGap', +$event)" (change)="onSliderChange()" />
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'pageMargins' | t }}</div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'leftRight' | t }}</span><span class="sl-val">{{ ws.design().pageHPad }}mm</span></div>
+                <input type="range" min="6" max="28" step="1" [ngModel]="ws.design().pageHPad" (ngModelChange)="setDesignNumber('pageHPad', +$event)" (change)="onSliderChange()" />
+              </div>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'topBottom' | t }}</span><span class="sl-val">{{ ws.design().pageVPad }}mm</span></div>
+                <input type="range" min="6" max="28" step="1" [ngModel]="ws.design().pageVPad" (ngModelChange)="setDesignNumber('pageVPad', +$event)" (change)="onSliderChange()" />
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'layout') {
+          <div class="tab-panel">
+            <div class="sbg">
+              <div class="sbg-title">{{ 'templateStyle' | t }}</div>
+              <div class="tpl-grid">
+                @for (t of templates; track t.id) {
+                  <button type="button" class="tpl-card" [class.on]="ws.design().templateId === t.id" (click)="applyTpl(t.id)">
+                    <div class="tpl-icon">{{ t.icon }}</div>
+                    <div class="tpl-name">{{ t.name }}</div>
+                    <div class="tpl-desc">{{ t.desc }}</div>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'pageFormat' | t }}</div>
+              <div class="radio-row wrap">
+                <button type="button" class="rdo" [class.on]="ws.design().pageFormat === 'a4'" (click)="setFmt('a4')">A4</button>
+                <button type="button" class="rdo" [class.on]="ws.design().pageFormat === 'letter'" (click)="setFmt('letter')">{{ 'usLetter' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().pageFormat === 'legal'" (click)="setFmt('legal')">{{ 'usLegal' | t }}</button>
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'pageOrientation' | t }}</div>
+              <div class="radio-row">
+                <button type="button" class="rdo" [class.on]="ws.design().pdfOrientation === 'portrait'" (click)="setPdfOrientation('portrait')">{{ 'portrait' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().pdfOrientation === 'landscape'" (click)="setPdfOrientation('landscape')">{{ 'landscape' | t }}</button>
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'pdfOuterMargin' | t }}</div>
+              <p class="sbg-hint">{{ 'pdfOuterMarginHint' | t }}</p>
+              <div class="sl-group">
+                <div class="sl-row"><span class="sl-label">{{ 'uniformMm' | t }}</span><span class="sl-val">{{ ws.design().pdfMarginMm }}mm</span></div>
+                <input type="range" min="0" max="25" step="1" [ngModel]="ws.design().pdfMarginMm" (ngModelChange)="setDesignNumber('pdfMarginMm', +$event)" (change)="onSliderChange()" />
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'sectionDivider' | t }}</div>
+              <div class="div-grid">
+                @for (d of dividers; track d.id) {
+                  <button type="button" class="div-opt" [class.on]="ws.design().dividerId === d.id" (click)="onDividerPick(d.id)">
+                    <div class="div-preview"><div [attr.style]="dividerPreview[d.id]"></div></div>
+                    <div class="div-lbl">{{ d.lbl }}</div>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'paperColor' | t }}</div>
+              <div class="radio-row">
+                <button type="button" class="rdo" [class.on]="ws.design().paperBg === '#ffffff'" (click)="setPaper('#ffffff')">{{ 'white' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().paperBg === '#fefdf5'" (click)="setPaper('#fefdf5')">{{ 'cream' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().paperBg === '#f8fafc'" (click)="setPaper('#f8fafc')">{{ 'cool' | t }}</button>
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'nameStyle' | t }}</div>
+              <div class="radio-row">
+                <button type="button" class="rdo" [class.on]="ws.design().nameCase === 'uppercase'" (click)="setNameCase('uppercase')">{{ 'upper' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().nameCase === 'capitalize'" (click)="setNameCase('capitalize')">{{ 'titleCase' | t }}</button>
+                <button type="button" class="rdo" [class.on]="ws.design().nameCase === 'none'" (click)="setNameCase('none')">{{ 'normal' | t }}</button>
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'atsMode' | t }}</div>
+              <label class="tog-row">
+                <span>{{ 'atsModeHint' | t }}</span>
+                <label class="tog">
+                  <input type="checkbox" [ngModel]="ws.design().plainContact" (ngModelChange)="setPlainContact($event)" />
+                  <span class="tog-track"></span>
+                </label>
+              </label>
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'sections') {
+          <div class="tab-panel">
+            <div class="sbg">
+              <div class="sbg-title">{{ 'showHideSections' | t }}</div>
+              <div class="sec-list">
+                @for (s of sectionMeta(); track s.id) {
+                  <div class="sec-row">
+                    <span class="sec-name">{{ s.labelKey | t }}</span>
+                    <label class="tog">
+                      <input type="checkbox" [ngModel]="ws.sections()[s.id]" (ngModelChange)="toggleSection(s.id, $event)" />
+                      <span class="tog-track"></span>
+                    </label>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'resetAll' | t }}</div>
+              <button type="button" class="reset-btn" (click)="doReset()">{{ 'resetBtn' | t }}</button>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'shortcuts' | t }}</div>
+              <div class="kbd-hint">Ctrl+Z → {{ 'undo' | t }}</div>
+              <div class="kbd-hint">Ctrl+Y → {{ 'redo' | t }}</div>
+              <div class="kbd-hint">Ctrl+P → {{ 'print' | t }}</div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'tools') {
+          <div class="tab-panel">
+            <div class="sbg">
+              <div class="sbg-title">{{ 'langLabel' | t }}</div>
+              <div class="radio-row wrap">
+                @for (L of langs; track L) {
+                  <button type="button" class="rdo" [class.on]="i18n.lang() === L" (click)="i18n.setLang(L)">{{ L | uppercase }}</button>
+                }
+              </div>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'atsCheckerTitle' | t }}</div>
+              <p class="sbg-hint">{{ 'atsCheckerHint' | t }}</p>
+              <button type="button" class="tbtn tbtn-ghost full" (click)="autoFixAts()">{{ 'atsAutoFix' | t }}</button>
+              <button type="button" class="tbtn tbtn-pdf full" (click)="runAtsCheck()">{{ 'analyze' | t }}</button>
+
+              @if (atsResult(); as ar) {
+                <p class="ats-disclaimer">{{ ar.disclaimerKey | t }}</p>
+                <div class="ats-score-card">
+                  <div class="ats-score-main" [ngClass]="atsScoreClass(ar.score)">
+                    <span class="ats-score-num">{{ ar.score }}</span>
+                    <span class="ats-score-cap">{{ 'atsScoreLabel' | t }}</span>
+                  </div>
+                  <div class="ats-breakdown">
+                    <div class="ats-metric">
+                      <span>{{ 'atsContentFit' | t }}</span>
+                      <strong>{{ ar.contentScore }}%</strong>
+                    </div>
+                    <div class="ats-bar"><span class="ats-bar-fill kw" [style.width.%]="ar.contentScore"></span></div>
+                    <div class="ats-metric">
+                      <span>{{ 'atsStructureFit' | t }}</span>
+                      <strong>{{ ar.structureScore }}%</strong>
+                    </div>
+                    <div class="ats-bar"><span class="ats-bar-fill st" [style.width.%]="ar.structureScore"></span></div>
+                    @if (!ar.jdEmpty) {
+                      <div class="ats-metric ats-sub">
+                        <span>{{ 'atsPostingMatch' | t }}</span>
+                        <strong>{{ ar.jdMatchScore }}%</strong>
+                      </div>
+                      <div class="ats-bar"><span class="ats-bar-fill jd" [style.width.%]="ar.jdMatchScore"></span></div>
+                      <div class="ats-metric ats-sub">
+                        <span>{{ 'atsMatchedKeywords' | t }}</span>
+                        <strong>{{ ar.matchedKeywordCount }} / {{ ar.trackedKeywordCount }}</strong>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                @if (ar.suggestions.length) {
+                  <div class="ats-suggestions">
+                    <div class="ats-subtitle">{{ 'atsSuggestedFixes' | t }}</div>
+                    @for (s of ar.suggestions; track $index) {
+                      <div class="ats-sug-row">
+                        <span class="ats-sug-pts" [title]="'atsPtsHint' | t">+{{ s.pointsAvailable }}</span>
+                        <span class="ats-sug-text">{{ s.messageKey | t }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <div class="ats-rubric-wrap">
+                  <div class="ats-subtitle">{{ 'atsRubricTitle' | t }}</div>
+                  <table class="ats-rubric-table">
+                    <thead>
+                      <tr>
+                        <th>{{ 'atsRubricCriterion' | t }}</th>
+                        <th>{{ 'atsRubricPoints' | t }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of ar.breakdown; track row.id) {
+                        <tr [class.incomplete]="row.earned < row.max">
+                          <td>{{ row.labelKey | t }}</td>
+                          <td>{{ row.earned }} / {{ row.max }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                @if (ar.keywords.length) {
+                  <div class="ats-kw-head">
+                    <span>{{ 'atsKeywordList' | t }}</span>
+                    @if (atsIgnoredWords().size > 0) {
+                      <button type="button" class="ats-link-btn" (click)="clearAtsIgnored()">{{ 'atsRestoreIgnored' | t }}</button>
+                    }
+                  </div>
+                  <div class="ats-kw-table">
+                    @for (k of ar.keywords; track k.word) {
+                      <div class="ats-kw-row" [class.hit]="k.inResume">
+                        <span class="ats-kw-status">{{ k.inResume ? '✓' : '○' }}</span>
+                        <span class="ats-kw-word">{{ k.word }}</span>
+                        <span class="ats-kw-w">{{ k.jdCount }}×</span>
+                        <button type="button" class="ats-kw-dismiss" (click)="ignoreAtsKeyword(k.word)" [title]="'atsDismissKeyword' | t">×</button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (keywordHints().length) {
+                  <div class="kw-list">
+                    <div class="kw-title">{{ 'missingKeywords' | t }}</div>
+                    @for (h of keywordHints(); track h.word) {
+                      <span class="kw-chip">{{ h.word }} ({{ h.count }})</span>
+                    }
+                  </div>
+                }
+
+              }
+
+              <details class="ats-jd-details">
+                <summary>{{ 'atsOptionalJD' | t }}</summary>
+                <textarea class="jd-area" rows="5" [ngModel]="jdText()" (ngModelChange)="jdText.set($event)" [placeholder]="'pasteJobDesc' | t"></textarea>
+                <button type="button" class="tbtn tbtn-ghost full" (click)="runAtsCheck()">{{ 'analyze' | t }}</button>
+              </details>
+            </div>
+            <div class="sbg">
+              <div class="sbg-title">{{ 'exportJson' | t }}</div>
+              <button type="button" class="tbtn tbtn-print full" (click)="downloadJson()">{{ 'downloadJson' | t }}</button>
+              <button type="button" class="tbtn tbtn-ghost full" (click)="copyJson()">{{ 'copyJson' | t }}</button>
+              <label class="file-pick full">{{ 'importPick' | t }}<input type="file" accept="application/json" (change)="onImportFile($event)" /></label>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="sidebar-footer">
+        <button type="button" class="tbtn tbtn-logout full" (click)="signOut()">{{ 'signOut' | t }}</button>
+      </div>
+    </aside>
+  </div>
+</div>

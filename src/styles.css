@@ -1,0 +1,30 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #0d1117;
+}
+
+/* innerHTML rich text (injected markup is not view-encapsulated) */
+.resume-doc .rich-view b,
+.resume-doc .rich-view strong,
+.cover-doc .rich-view b,
+.cover-doc .rich-view strong {
+  font-weight: 700;
+}
+
+.resume-doc .rich-view i,
+.resume-doc .rich-view em,
+.cover-doc .rich-view i,
+.cover-doc .rich-view em {
+  font-style: italic;
+}
+
+.resume-doc .rich-view u,
+.cover-doc .rich-view u {
+  text-decoration: underline;
+}

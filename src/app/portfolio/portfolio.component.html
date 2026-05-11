@@ -1,0 +1,358 @@
+<div class="pf-root">
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div id="spotlight" class="hero-spotlight" aria-hidden="true"></div>
+
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo" (click)="closeMenu()">SOH<span>.</span></a>
+      <ul class="nav-links" [class.nav-open]="mobileMenuOpen" id="navLinks">
+        <li><a href="#about" data-section="about" (click)="closeMenu()">About</a></li>
+        <li><a href="#skills" data-section="skills" (click)="closeMenu()">Skills</a></li>
+        <li><a href="#experience" data-section="experience" (click)="closeMenu()">Experience</a></li>
+        <li><a href="#expertise" data-section="expertise" (click)="closeMenu()">ERP</a></li>
+        <li><a href="#education" data-section="education" (click)="closeMenu()">Education</a></li>
+        <li><a href="#contact" data-section="contact" (click)="closeMenu()">Contact</a></li>
+        <li class="nav-mobile-extra">
+          <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" (click)="closeMenu()">Resume Studio</a>
+        </li>
+        <li class="nav-mobile-extra">
+          <button type="button" class="nav-mobile-download" (click)="downloadResume(); closeMenu()">Download Resume</button>
+        </li>
+        <li class="nav-mobile-extra"><a href="mailto:syedhashmi089@gmail.com" (click)="closeMenu()">Hire Me</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button type="button" class="nav-studio nav-download-btn" (click)="downloadResume()">Download Resume</button>
+        <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" class="nav-studio">Resume Studio</a>
+        <a href="mailto:syedhashmi089@gmail.com" class="nav-cta">Hire Me</a>
+      </div>
+      <button type="button" class="hamburger" [class.open]="mobileMenuOpen" (click)="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <canvas #particleCanvas id="particles"></canvas>
+    <div class="hero-orb hero-orb--1" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--2" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb--3" aria-hidden="true"></div>
+    <div class="hero-bg-grad"></div>
+    <div class="hero-mesh" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          <span class="badge-txt">Available for opportunities</span>
+        </div>
+        <h1 class="hero-name">
+          <span class="name-word">Syed</span>
+          <span class="name-word">Obaid</span>
+          <span class="name-word name-word--last">Hashmi</span>
+        </h1>
+        <div class="hero-role">
+          <span class="hero-comment">// </span>
+          <span class="typed-word" id="typedText"></span>
+          <span class="blink">_</span>
+        </div>
+        <p class="hero-desc">
+          {{ heroTagline }}
+        </p>
+        <div class="hero-btns">
+          <div class="hero-btn-slot hero-btn-slot--primary">
+            <span class="hero-btn-deco hero-btn-deco--dot" aria-hidden="true"></span>
+            <span class="hero-btn-deco hero-btn-deco--ring" aria-hidden="true"></span>
+            <a href="#experience" class="btn-primary">↓ View My Work</a>
+          </div>
+          <div class="hero-btn-slot hero-btn-slot--secondary">
+            <button type="button" class="btn-secondary btn-download" (click)="downloadResume()">Download Resume</button>
+          </div>
+          <div class="hero-btn-slot hero-btn-slot--secondary">
+            <a href="mailto:syedhashmi089@gmail.com" class="btn-secondary">✉ Get In Touch</a>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <div>
+              <span class="count-num" [attr.data-to]="stats.yearsExp">0</span><span class="stat-plus">+</span>
+            </div>
+            <div class="stat-lbl">Years Exp.</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat">
+            <div>
+              <span class="count-num" [attr.data-to]="stats.companies">0</span><span class="stat-plus">+</span>
+            </div>
+            <div class="stat-lbl">Companies</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat">
+            <div>
+              <span class="count-num" [attr.data-to]="stats.projects">0</span><span class="stat-plus">+</span>
+            </div>
+            <div class="stat-lbl">Projects</div>
+          </div>
+          <div class="stat-sep"></div>
+          <div class="stat">
+            <div>
+              <span class="count-num" [attr.data-to]="stats.certs">0</span><span class="stat-plus">+</span>
+            </div>
+            <div class="stat-lbl">Certs</div>
+          </div>
+        </div>
+      </div>
+      <aside class="hero-visual" aria-label="Portrait">
+        <div class="hero-visual-ambient" aria-hidden="true">
+          <div class="hero-visual-ambient-grid"></div>
+          <div class="hero-visual-ambient-glow"></div>
+          <span class="hva-node"></span>
+          <span class="hva-node"></span>
+          <span class="hva-node"></span>
+          <span class="hva-node"></span>
+          <span class="hva-node"></span>
+          <span class="hva-ring"></span>
+          <span class="hva-ring hva-ring--delayed"></span>
+        </div>
+        <div class="hero-code-float" aria-hidden="true">
+          const engineer = &#123;<br />
+          &nbsp;&nbsp;name: "Syed Obaid",<br />
+          &nbsp;&nbsp;stack: [".NET", "Angular"],<br />
+          &nbsp;&nbsp;passion: "ERP Solutions",<br />
+          &nbsp;&nbsp;available: true<br />
+          &#125;;
+        </div>
+        <!-- Portrait: save your image as public/portfolio/profile.jpg (replace file when ready). -->
+        <figure class="hero-photo-card">
+          <div class="hero-photo-topfx" aria-hidden="true"></div>
+          @if (!photoMissing()) {
+            <img
+              src="/portfolio/profile.jpg"
+              width="400"
+              height="500"
+              alt="Syed Obaid Hashmi"
+              class="hero-photo"
+              (error)="onPhotoError()"
+              loading="eager"
+              decoding="async"
+            />
+          }
+          @if (photoMissing()) {
+            <div class="hero-photo-fallback" role="img" aria-label="Portrait placeholder">
+              <span class="hero-photo-initials">SOH</span>
+            </div>
+          }
+        </figure>
+      </aside>
+    </div>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-inner">
+      <div class="marquee-track">
+        @for (item of marqueeLoop; track $index) {
+          <span class="marquee-item">{{ item }}<span class="marquee-sep">◆</span></span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <section id="about" class="section">
+    <div class="container">
+      <div class="section-label">01 / About Me</div>
+      <div class="about-grid">
+        <div class="about-visual reveal-up">
+          <div class="avatar-wrap">
+            <div class="avatar-core">
+              <div class="avatar-initials">SOH</div>
+              <div class="avatar-tagline">Full Stack Dev</div>
+            </div>
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+            <div class="orbit-items">
+              @for (tag of orbitTags; track tag) {
+                <div class="oi">{{ tag }}</div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="about-text">
+          <h2 class="section-title reveal-up">
+            {{ aboutHeadline.lead }}<em>{{ aboutHeadline.accent }}</em>{{ aboutHeadline.tail }}
+          </h2>
+          @for (para of aboutParas; track $index) {
+            <p class="reveal-up">{{ para }}</p>
+          }
+          <div class="about-tags reveal-up">
+            @for (tag of aboutTags; track tag) {
+              <span class="tag">{{ tag }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" class="section section-alt">
+    <div class="container">
+      <div class="section-label">02 / Technical Skills</div>
+      <h2 class="section-title centered reveal-up">My Tech Arsenal</h2>
+      <p class="section-sub centered reveal-up">{{ skillsSectionSub }}</p>
+
+      <div class="skills-grid">
+        @for (card of skillCards; track card.name) {
+          <div class="skill-card reveal-up">
+            <div class="sc-icon">{{ card.icon }}</div>
+            <div class="sc-name">{{ card.name }}</div>
+            <div class="sc-tags">
+              @for (t of card.tags; track t) {
+                <span>{{ t }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="prof-section reveal-up">
+        <div class="prof-title">Core Proficiency</div>
+        <div class="prof-grid" id="profGrid">
+          @for (bar of profBars; track bar.label) {
+            <div class="prof-item">
+              <div class="prof-head"><span>{{ bar.label }}</span><span>{{ bar.pct }}%</span></div>
+              <div class="prof-track"><div class="prof-fill" [attr.data-w]="bar.pct"></div></div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="section">
+    <div class="container">
+      <div class="section-label">03 / Experience</div>
+      <h2 class="section-title reveal-up">Career Journey</h2>
+      <p class="section-sub reveal-up">{{ experienceSub }}</p>
+
+      <div class="timeline">
+        <div class="tl-line"></div>
+        <div class="tl-line-fill" id="tlFill"></div>
+
+        @for (job of jobs; track job.id; let idx = $index) {
+          <div class="tl-entry reveal-up" [class.left]="idx % 2 === 0" [class.right]="idx % 2 === 1">
+            <div class="tl-dot"></div>
+            <div class="tl-card">
+              <div class="tl-company">{{ job.company }}</div>
+              <div class="tl-role">{{ job.role }}</div>
+              <div class="tl-date">{{ job.dates }}</div>
+              <ul class="tl-points">
+                @for (point of job.bullets; track $index) {
+                  <li>{{ point }}</li>
+                }
+              </ul>
+              <div class="tl-techs">
+                @for (x of jobTechs(job.company); track x) {
+                  <span>{{ x }}</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="expertise" class="section section-alt">
+    <div class="container">
+      <div class="section-label">04 / ERP &amp; CRM</div>
+      <h2 class="section-title centered reveal-up">Microsoft Dynamics <em>365</em></h2>
+      <p class="section-sub centered reveal-up">Hands-on experience across Finance &amp; Operations, Commerce, and CRM.</p>
+
+      <div class="erp-grid">
+        @for (erp of erpCards; track erp.title) {
+          <div class="erp-card reveal-up">
+            <div class="erp-number">{{ erp.num }}</div>
+            <div class="erp-icon">{{ erp.icon }}</div>
+            <div class="erp-name">{{ erp.title }}</div>
+            <ul class="erp-points">
+              @for (pt of erp.items; track $index) {
+                <li>{{ pt }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="education" class="section qual-section">
+    <div class="container">
+      <div class="section-label section-label--pulse">05 / Education &amp; Certifications</div>
+      <div class="qual-title-wrap">
+        <span class="qual-title-ring" aria-hidden="true"></span>
+        <h2 class="section-title reveal-up">Qualifications</h2>
+      </div>
+
+      <div class="edu-grid">
+        <div class="edu-card reveal-up">
+          <div class="edu-card-accent"></div>
+          <div class="edu-icon">🎓</div>
+          <div class="edu-deg">{{ education.degree }}</div>
+          <div class="edu-school">{{ education.school }} · {{ education.location }}</div>
+          <div class="edu-meta">
+            @for (chip of educationChips; track chip) {
+              <span class="edu-chip">{{ chip }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="certs-list">
+          @for (c of certRows; track c.title) {
+            <div class="cert-item reveal-up">
+              <div class="cert-dot"></div>
+              <div class="cert-text">
+                <strong>{{ c.title }}</strong>
+                @if (c.meta) {
+                  <span>{{ c.meta }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section section-alt">
+    <div class="contact-glow"></div>
+    <div class="container">
+      <div class="contact-inner">
+        <div class="contact-eyebrow reveal-up">// Let's build something</div>
+        <div class="contact-big reveal-up">
+          Let's<br /><span>Work</span> Together
+        </div>
+        <p class="contact-desc reveal-up">{{ contactBlurb }}</p>
+        <a [href]="'mailto:' + personal.email" class="contact-email reveal-up">{{ personal.email }}</a>
+        <div class="contact-socials reveal-up">
+          <a [href]="personal.linkedin" target="_blank" rel="noopener" class="social-btn">💼 LinkedIn</a>
+          <a [href]="telHref()" class="social-btn">📞 Call</a>
+          <a [href]="'mailto:' + personal.email" class="social-btn">✉ Email</a>
+          <button type="button" class="social-btn" (click)="downloadResume()">⬇ Download Resume</button>
+          <a routerLink="/login" [queryParams]="{ returnUrl: '/resume' }" class="social-btn social-studio">🔐 Resume Editor</a>
+        </div>
+        <div class="contact-location reveal-up">📍 {{ personal.location }} · Remote-friendly</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">SOH<span>.</span></div>
+      <div class="footer-copy">© {{ year }} Syed Obaid Hashmi</div>
+      <a href="#hero" class="footer-back">↑ Top</a>
+    </div>
+  </footer>
+</div>

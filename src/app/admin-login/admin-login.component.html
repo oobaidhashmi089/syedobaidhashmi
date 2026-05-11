@@ -1,0 +1,37 @@
+<div class="login-shell">
+  <app-network-canvas attach="viewport" [interactive]="true" />
+  <div class="login-card">
+    <a routerLink="/" class="back">← Portfolio</a>
+    <h1>ATS Resume Studio</h1>
+    <p class="hint">Admin access to edit your resume and exports.</p>
+
+    @if (error) {
+      <div class="err">{{ error }}</div>
+    }
+
+    <form (ngSubmit)="submit()" #f="ngForm">
+      <label>
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          autocomplete="username"
+          required
+          placeholder="you@example.com"
+        />
+      </label>
+      <label>
+        <span>Password</span>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+      <button type="submit" [disabled]="busy || !f.valid">Enter studio</button>
+    </form>
+  </div>
+</div>

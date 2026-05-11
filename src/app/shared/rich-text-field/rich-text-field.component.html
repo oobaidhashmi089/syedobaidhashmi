@@ -1,0 +1,28 @@
+<div class="rich-wrap" [class.compact]="variant() === 'line' || variant() === 'role'">
+  <div class="rich-toolbar" role="toolbar">
+    <button type="button" class="rt-btn" (mousedown)="holdFocus($event)" (click)="bold()" title="Bold"><b>B</b></button>
+    <button type="button" class="rt-btn" (mousedown)="holdFocus($event)" (click)="italic()" title="Italic"><i>I</i></button>
+    <label class="rt-size">
+      <span class="rt-sr">Font size</span>
+      <select #sizeSel (mousedown)="holdFocus($event)" (change)="onSizeChange(sizeSel)">
+        <option value="">{{ sizeLabel() }}</option>
+        @for (pz of fontSizes; track pz) {
+          <option [value]="pz">{{ pz }}px</option>
+        }
+      </select>
+    </label>
+  </div>
+  <div
+    #host
+    class="rich-editable"
+    [class.area-like]="variant() === 'area'"
+    [class.bullet-like]="variant() === 'line' || variant() === 'role' || variant() === 'title'"
+    [class.role-like]="variant() === 'role'"
+    [class.title-like]="variant() === 'title'"
+    contenteditable="true"
+    spellcheck="true"
+    (input)="emitChange()"
+    (paste)="onPaste($event)"
+    (blur)="onBlur()"
+  ></div>
+</div>

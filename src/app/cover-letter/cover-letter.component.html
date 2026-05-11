@@ -1,0 +1,82 @@
+<div class="cl-page">
+  <app-network-canvas attach="viewport" [interactive]="true" />
+  <div class="cl-shell">
+  <header class="toolbar">
+    <a routerLink="/" class="tb-logo">
+      <span class="tb-logo-icon">✉</span>
+      {{ 'coverTitle' | t }}
+    </a>
+    <div class="tb-group">
+      <span class="muted small">{{ 'saveLocal' | t }}</span>
+      <div class="zoom-pill">
+        <button type="button" class="zoom-btn" (click)="adjZoom(-8)">−</button>
+        <span class="zoom-lbl">{{ zoom() }}%</span>
+        <button type="button" class="zoom-btn" (click)="adjZoom(8)">+</button>
+      </div>
+    </div>
+    <div class="tb-group">
+      <div class="lang-row">
+        @for (L of langs; track L) {
+          <button type="button" class="pill" [class.on]="i18n.lang() === L" (click)="i18n.setLang(L)">{{ L | uppercase }}</button>
+        }
+      </div>
+      <button type="button" class="tbtn tbtn-ghost" (click)="shareText()">{{ 'share' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="signOut()">{{ 'signOut' | t }}</button>
+      <button type="button" class="tbtn tbtn-print" (click)="doPrint()">{{ 'print' | t }}</button>
+      <button type="button" class="tbtn tbtn-ghost" (click)="doPdfAts()">{{ 'pdfAts' | t }}</button>
+      <button type="button" class="tbtn tbtn-pdf" [disabled]="pdfBusy()" (click)="doPdf()">
+        {{ pdfBusy() ? ('generating' | t) : ('pdfVisual' | t) }}
+      </button>
+    </div>
+  </header>
+
+  <p class="sub">{{ 'coverSubtitle' | t }}</p>
+
+  <div class="cl-layout">
+    <div class="cl-form">
+      <label>{{ 'yourContact' | t }}</label>
+      <input [ngModel]="model().yourName" (ngModelChange)="patch('yourName', $event)" />
+      <input [ngModel]="model().email" (ngModelChange)="patch('email', $event)" />
+      <input [ngModel]="model().phone" (ngModelChange)="patch('phone', $event)" />
+
+      <label>{{ 'recipient' | t }}</label>
+      <input [ngModel]="model().company" (ngModelChange)="patch('company', $event)" [attr.placeholder]="i18n.t('company')" />
+      <input [ngModel]="model().manager" (ngModelChange)="patch('manager', $event)" [attr.placeholder]="i18n.t('hiringManager')" />
+      <input [ngModel]="model().role" (ngModelChange)="patch('role', $event)" [attr.placeholder]="i18n.t('role')" />
+
+      <label>{{ 'opening' | t }}</label>
+      <app-rich-text-field [ngModel]="model().opening" (ngModelChange)="patch('opening', $event)" />
+      <p class="hint">Tokens (wrap each in double curly braces): company · role · yourName · manager</p>
+
+      <label>{{ 'body' | t }}</label>
+      <app-rich-text-field [ngModel]="model().body" (ngModelChange)="patch('body', $event)" />
+
+      <label>{{ 'closing' | t }}</label>
+      <app-rich-text-field [ngModel]="model().closing" (ngModelChange)="patch('closing', $event)" />
+
+      <label>Date</label>
+      <input [ngModel]="model().dateStr" (ngModelChange)="patch('dateStr', $event)" />
+    </div>
+
+    <div class="cl-canvas">
+      <div id="cover-wrap" class="cover-wrap">
+        <article id="cover-root" #coverPreview class="cover-doc">
+          <div class="meta">{{ model().dateStr }}</div>
+          <div class="block">
+            <div>{{ model().yourName }}</div>
+            <div>{{ model().email }} · {{ model().phone }}</div>
+          </div>
+          <div class="block">
+            <div>{{ model().company }}</div>
+            <div>{{ 'hiringManager' | t }}: {{ model().manager }}</div>
+          </div>
+          <p class="sal">Dear {{ model().manager }},</p>
+          <p class="para rich-view" [innerHTML]="safeCl(interpolated(model().opening))"></p>
+          <p class="para rich-view" [innerHTML]="safeCl(interpolated(model().body))"></p>
+          <p class="para pre rich-view" [innerHTML]="safeCl(interpolated(model().closing))"></p>
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

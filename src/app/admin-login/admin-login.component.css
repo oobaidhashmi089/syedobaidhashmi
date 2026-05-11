@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Unbounded:wght@300;400;600;700;900&display=swap');
+
+:host {
+  display: block;
+  --void: #010108;
+  --dark: #06060f;
+  --primary: #baff29;
+  --primary-dim: rgba(186, 255, 41, 0.1);
+  --primary-glow: rgba(186, 255, 41, 0.28);
+  --text: #ededea;
+  --muted: #888884;
+  --border: rgba(255, 255, 255, 0.1);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.login-shell {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% -15%, rgba(186, 255, 41, 0.14), transparent 52%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(129, 140, 248, 0.06), transparent 45%),
+    linear-gradient(180deg, var(--void) 0%, var(--dark) 100%);
+  color: var(--text);
+}
+
+.login-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+app-network-canvas {
+  z-index: 1;
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  padding: 36px 32px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(186, 255, 41, 0.06) inset;
+}
+
+.back {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+
+.back:hover {
+  color: var(--primary);
+}
+
+h1 {
+  font-family: 'Unbounded', 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+  letter-spacing: -0.03em;
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 28px;
+  line-height: 1.55;
+}
+
+.err {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #f87171;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 18px;
+}
+
+label span {
+  display: block;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(1, 1, 8, 0.65);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+input::placeholder {
+  color: rgba(136, 136, 132, 0.65);
+}
+
+input:focus {
+  outline: none;
+  border-color: rgba(186, 255, 41, 0.45);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+button[type='submit'] {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Unbounded', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary), #9fd62a);
+  color: var(--void);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+button[type='submit']:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 36px var(--primary-glow);
+}
+
+button[type='submit']:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

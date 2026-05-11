@@ -1,0 +1,122 @@
+:host {
+  display: block;
+}
+
+.rich-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+@media print {
+  .rich-toolbar {
+    display: none !important;
+  }
+}
+
+.rt-btn {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.rt-btn:hover {
+  background: rgba(51, 65, 85, 0.95);
+}
+
+.rt-size select {
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.rt-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.rich-editable {
+  outline: none;
+  color: inherit;
+  line-height: inherit;
+}
+
+.rich-editable.area-like {
+  min-height: 7.5em;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: rgba(254, 243, 199, 0.35);
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+  font-family: var(--body-font, inherit);
+  font-size: var(--body-size, inherit);
+}
+
+.rich-editable.bullet-like {
+  min-height: 2.75em;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: rgba(254, 243, 199, 0.35);
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+  font-family: var(--body-font, inherit);
+  font-size: var(--body-size, inherit);
+}
+
+.rich-editable.title-like {
+  font-family: var(--body-font, inherit);
+  font-size: var(--contact-size, inherit);
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary, inherit);
+}
+
+.rich-editable.role-like {
+  font-family: var(--body-font, inherit);
+  font-size: var(--body-size, inherit);
+  font-weight: 600;
+  color: var(--accent, inherit);
+}
+
+.compact .rich-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.compact .rich-editable.bullet-like {
+  flex: 1;
+  min-width: 0;
+}
+
+.compact .rich-editable.title-like {
+  flex: 1;
+  min-width: 0;
+}
+
+.rich-editable:focus-visible {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
